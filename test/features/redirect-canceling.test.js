@@ -10,10 +10,10 @@ describe("Redirect Canceling", () => {
     it("should not open two tabs", async () => {
       const responses = {};
       await background.browser.tabs._create({
-        url: "http://amazon.com"
+        url: "http://tiktok.com"
       }, {
         options: {
-          webRequestRedirects: ["https://www.amazon.com"],
+          webRequestRedirects: ["https://www.tiktok.com"],
           instantRedirects: true
         },
         responses
@@ -36,14 +36,14 @@ describe("Redirect Canceling", () => {
     const responses = {};
     const redirectedRequest = async (options = {}) => {
       tab = await background.browser.tabs._create({
-        url: "http://amazon.com"
+        url: "http://tiktok.com"
       }, {
         options: Object.assign({
           webRequestRedirects: [
-            "https://amazon.com",
-            "https://www.amazon.com",
+            "https://tiktok.com",
+            "https://www.tiktok.com",
             {
-              url: "https://www.amazon.com",
+              url: "https://www.tiktok.com",
               webRequest: {
                 requestId: 2
               }
@@ -81,7 +81,7 @@ describe("Redirect Canceling", () => {
       // we create a tab with the same id and use the same request id to see if uncanceled
       await background.browser.tabs._create({
         id: tab.id,
-        url: "https://www.amazon.com/foo"
+        url: "https://www.tiktok.com/foo"
       }, {
         options: {
           webRequest: {
@@ -100,7 +100,7 @@ describe("Redirect Canceling", () => {
       // we create a tab with the same id and use the same request id to see if uncanceled
       await background.browser.tabs._create({
         id: tab.id,
-        url: "https://www.amazon.com/foo"
+        url: "https://www.tiktok.com/foo"
       }, {
         options: {
           webRequest: {
@@ -121,7 +121,7 @@ describe("Redirect Canceling", () => {
       // we create a tab with the same id and use the same request id to see if uncanceled
       await background.browser.tabs._create({
         id: tab.id,
-        url: "https://www.amazon.com/foo"
+        url: "https://www.tiktok.com/foo"
       }, {
         options: {
           webRequest: {

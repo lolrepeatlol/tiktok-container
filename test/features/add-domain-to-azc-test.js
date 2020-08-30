@@ -1,4 +1,4 @@
-describe("Add domain to Amazon Container", () => {
+describe("Add domain to TikTok Container", () => {
     let webExtension, background;
   
     beforeEach(async () => {
@@ -6,9 +6,9 @@ describe("Add domain to Amazon Container", () => {
       background = webExtension.background;
     });
   
-    describe("runtime message add-to-amazon-container", () => {
+    describe("runtime message add-to-tiktok-container", () => {
       beforeEach(async () => {
-        await background.browser.runtime.onMessage.addListener.yield("add-to-amazon-container", {
+        await background.browser.runtime.onMessage.addListener.yield("add-to-tiktok-container", {
           url: "https://example.com"
         });
       });

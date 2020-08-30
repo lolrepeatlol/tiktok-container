@@ -1,7 +1,7 @@
 {
-  "name": "contain-amazon",
+  "name": "TikTok Container",
   "version": "2.0.0",
-  "description": "Amazon Container isolates your Amazon activity from the rest of your web activity in order to prevent Amazon from tracking you outside of the Amazon website via third party cookies. ",
+  "description": "TikTok Container isolates your TikTok activity from the rest of your web activity in order to prevent ByteDance from tracking you outside of the TikTok website via third party cookies. ",
   "main": "background.js",
   "scripts": {
     "test": "eslint src test && npm run coverage",
@@ -18,12 +18,12 @@
     "firefox",
     "mozilla"
   ],
-  "author": "Kyle Rober",
+  "author": "Alexei Solonari",
   "license": "MPL-2.0",
   "bugs": {
-    "url": "https://github.com/krober/contain-amazon/issues"
+    "url": "https://github.com/lolrepeatlol/tiktok-container/issues"
   },
-  "homepage": "https://github.com/krober/contain-amazon#readme",
+  "homepage": "https://github.com/lolrepeatlol/tiktok-container",
   "devDependencies": {
     "chai": "^4.1.2",
     "cross-env": "^5.2.0",

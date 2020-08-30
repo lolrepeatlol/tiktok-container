@@ -1,10 +1,10 @@
 describe("Contain", () => {
-  let webExtension, background, amazonContainer;
+  let webExtension, background, tiktokContainer;
 
   beforeEach(async () => {
     webExtension = await loadWebExtension();
     background = webExtension.background;
-    amazonContainer = webExtension.amazonContainer;
+    tiktokContainer = webExtension.tiktokContainer;
   });
 
   describe("All requests stripped of fbclid param", () => {
@@ -12,7 +12,7 @@ describe("Contain", () => {
     beforeEach(async () => {
     });
 
-    it("should redirect non-Amazon urls with fbclid stripped", async () => {
+    it("should redirect non-TikTok urls with fbclid stripped", async () => {
       await background.browser.tabs._create({url: "https://github.com/?fbclid=123"}, {responses});
       expect(background.browser.tabs.create).to.not.have.been.called;
       const [promise] = responses.webRequest.onBeforeRequest;
@@ -21,36 +21,36 @@ describe("Contain", () => {
     });
 
     it("should preserve other url params", async () => {
-      await background.browser.tabs._create({url: "https://github.com/mozilla/contain-amazon/issues?q=is%3Aissue+is%3Aopen+track&fbclid=123"}, {responses});
+      await background.browser.tabs._create({url: "https://github.com/mozilla/contain-tiktok/issues?q=is%3Aissue+is%3Aopen+track&fbclid=123"}, {responses});
       expect(background.browser.tabs.create).to.not.have.been.called;
       const [promise] = responses.webRequest.onBeforeRequest;
       const result = await promise;
-      expect(result.redirectUrl).to.equal("https://github.com/mozilla/contain-amazon/issues?q=is%3Aissue+is%3Aopen+track");
+      expect(result.redirectUrl).to.equal("https://github.com/mozilla/contain-tiktok/issues?q=is%3Aissue+is%3Aopen+track");
     });
 
-    it("should redirect Amazon urls with fbclid stripped", async () => {
-      await background.browser.tabs._create({url: "https://www.amazon.com/help/securitynotice?fbclid=123"}, {responses});
+    it("should redirect TikTok urls with fbclid stripped", async () => {
+      await background.browser.tabs._create({url: "https://www.tiktok.com/help/securitynotice?fbclid=123"}, {responses});
       expect(background.browser.tabs.create).to.not.have.been.called;
       const [promise] = responses.webRequest.onBeforeRequest;
       const result = await promise;
-      expect(result.redirectUrl).to.equal("https://www.amazon.com/help/securitynotice");
+      expect(result.redirectUrl).to.equal("https://www.tiktok.com/help/securitynotice");
     });
   });
 
-  describe("Incoming requests to Amazon Domains outside of Amazon Container", () => {
+  describe("Incoming requests to TikTok Domains outside of TikTok Container", () => {
     const responses = {};
     beforeEach(async () => {
       await background.browser.tabs._create({
-        url: "https://www.amazon.com"
+        url: "https://www.tiktok.com"
       }, {
         responses
       });
     });
 
-    it("should be reopened in Amazon Container", async () => {
+    it("should be reopened in TikTok Container", async () => {
       expect(background.browser.tabs.create).to.have.been.calledWithMatch({
-        url: "https://www.amazon.com",
-        cookieStoreId: amazonContainer.cookieStoreId
+        url: "https://www.tiktok.com",
+        cookieStoreId: tiktokContainer.cookieStoreId
       });
     });
 
@@ -61,12 +61,12 @@ describe("Contain", () => {
     });
   });
 
-  describe("Incoming requests to Non-Amazon Domains inside Amazon Container", () => {
+  describe("Incoming requests to Non-TikTok Domains inside TikTok Container", () => {
     const responses = {};
     beforeEach(async () => {
       await background.browser.tabs._create({
         url: "https://example.com",
-        cookieStoreId: amazonContainer.cookieStoreId
+        cookieStoreId: tiktokContainer.cookieStoreId
       }, {
         responses
       });
@@ -91,7 +91,7 @@ describe("Contain", () => {
     const responses = {};
     beforeEach(async () => {
       await background.browser.tabs._create({
-        url: "ftp://www.amazon.com"
+        url: "ftp://www.tiktok.com"
       }, {
         responses
       });
@@ -110,7 +110,7 @@ describe("Contain", () => {
     const responses = {};
     beforeEach(async () => {
       await background.browser.tabs._create({
-        url: "https://www.amazon.com",
+        url: "https://www.tiktok.com",
         id: -1
       }, {
         responses

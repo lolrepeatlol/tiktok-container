@@ -1,133 +1,48 @@
 // Param values from https://developer.mozilla.org/Add-ons/WebExtensions/API/contextualIdentities/create
-const AMAZON_CONTAINER_DETAILS = {
-  name: "Amazon",
-  color: "orange",
-  icon: "briefcase"
+const TIKTOK_CONTAINER_DETAILS = {
+  name: "TikTok",
+  color: "purple",
+  icon: "apple"
 };
 
-const AMAZON_NATIONAL_DOMAINS = [
-  "amazon.cn",
-  "amazon.in",
-  "amazon.co.jp",
-  "amazon.com.sg",
-  "amazon.com.tr",
-  "amazon.fr",
-  "amazon.de",
-  "amazon.it",
-  "amazon.nl",
-  "amazon.es",
-  "amazon.co.uk",
-  "amazon.ca",
-  "amazon.com.mx",
-  "amazon.com.au",
-  "amazon.com.br",
-  "amazon.ae"
+const ALL_TIKTOK_DOMAINS = [
+  "tiktok.com",
+  "tiktok.org",
+  "tiktokcdn.com",
+  "tiktokv.com",
+  "muscdn.com",
+  "musical.ly",
+  "musically.ly",
+  "v16-tiktokcdn-com.akamaized.net",
+  "p16-tiktokcdn-com.akamaized.net",
+  "mon.byteoversea.com",
+  "mon-va.byteoversea.com",
+  "abtest-va-tiktok.byteoversea.com",
+  "sf-tb-sg.ibytedtos.com",
+  "xlog-va.byteoversea.com",
+  "dm-maliva16.byteoversea.com",
+  "dm.bytedance.com",
+  "sgali3.l.byteoversea.net",
+  "tiktokcdn-com.akamaized.net",
+  "ibytedtos.com",
+  "app.musemuse.cn",
+  "share.musemuse.cn"
 ];
 
-const AMAZON_TLD_DOMAINS = [
-  "amazon.clothing",
-  "amazon.com",
-  "amazon.company",
-  "amazon.cruises",
-  "amazon.dog",
-  "amazon.energy",
-  "amazon.express",
-  "amazon.fund",
-  "amazon.game",
-  "amazon.gd",
-  "amazon.gent",
-  "amazon.hockey",
-  "amazon.international",
-  "amazon.jobs",
-  "amazon.kiwi",
-  "amazon.ltda",
-  "amazon.press",
-  "amazon.re",
-  "amazon.salon",
-  "amazon.shopping",
-  "amazon.soccer",
-  "amazon.tickets",
-  "amazon.tienda",
-  "amazon.tours",
-  "amazon.training",
-  "amazon.tv",
-  "amazon.wiki"
-];
-
-const AUDIBLE_DOMAINS = [
-  "audible.com",
-  "audible.co.uk",
-  "audible.fr",
-  "audible.com.au",
-  "audible.de",
-  "audible.it",
-  "audible.ca",
-  "audible.in",
-  "audible.co.jp"
-];
-
-const WHOLEFOODS_DOMAINS = [
-  "wholefoodsmarket.com",
-  "wholefoodsmarket.co.uk"
-];
-
-const AMAZON_SERVICES_DOMAINS = [
-  "aboutamazon.com",
-  "alexa.com",
-  "amazoninspire.com",
-  "amazonpay.in",
-  "amazonteam.org",
-  "amzn.to",
-  "awscloud.com",
-  "awsevents.com",
-  "primevideo.com",
-  "twitch.com",
-  "twitch.tv"
-];
-
-let AMAZON_DOMAINS = [
-  "6pm.com",
-  "abebooks.com",
-  "acx.com",
-  "bookdepository.com",
-  "boxofficemojo.com",
-  "comixology.com",
-  "createspace.com",
-  "dpreview.com",
-  "eastdane.com",
-  "fabric.com",
-  "goodreads.com",
-  "imdb.com",
-  "junglee.com",
-  "lab126.com",
-  "mturk.com",
-  "seattlespheres.com",
-  "shopbop.com",
-  "souq.com",
-  "tenmarks.com",
-  "withoutabox.com",
-  "woot.com",
-  "zappos.com"
-];
-
-AMAZON_DOMAINS = AMAZON_DOMAINS.concat(
-  AMAZON_NATIONAL_DOMAINS, 
-  AMAZON_TLD_DOMAINS, 
-  AUDIBLE_DOMAINS,
-  WHOLEFOODS_DOMAINS,
-  AMAZON_SERVICES_DOMAINS
+TIKTOK_DOMAINS = TIKTOK_DOMAINS.concat(
+  ALL_TIKTOK_DOMAINS,  
 );
 
 const MAC_ADDON_ID = "@testpilot-containers";
 
 let macAddonEnabled = false;
-let amazonCookieStoreId = null;
+let tiktokCookieStoreId = null;
 
 const canceledRequests = {};
 const tabsWaitingToLoad = {};
 const tabStates = {};
 
-const amazonHostREs = [];
+const tiktokHostREs = [];
 
 async function isMACAddonEnabled () {
   try {
@@ -173,7 +88,7 @@ async function sendJailedDomainsToMAC () {
   try {
     return await browser.runtime.sendMessage(MAC_ADDON_ID, {
       method: "jailedDomains",
-      urls: AMAZON_DOMAINS.map((domain) => {
+      urls: TIKTOK_DOMAINS.map((domain) => {
         return `https://${domain}/`;
       })
     });
@@ -242,14 +157,14 @@ function shouldCancelEarly (tab, options) {
   return false;
 }
 
-function generateAmazonHostREs () {
-  for (let amazonDomain of AMAZON_DOMAINS) {
-    amazonHostREs.push(new RegExp(`^(.*\\.)?${amazonDomain}$`));
+function generateTikTokHostREs () {
+  for (let tiktokDomain of TIKTOK_DOMAINS) {
+    tiktokHostREs.push(new RegExp(`^(.*\\.)?${tiktokDomain}$`));
   }
 }
 
-async function clearAmazonCookies () {
-  // Clear all amazon cookies
+async function clearTikTokCookies () {
+  // Clear all tiktok cookies
   const containers = await browser.contextualIdentities.query({});
   containers.push({
     cookieStoreId: "firefox-default"
@@ -257,76 +172,76 @@ async function clearAmazonCookies () {
 
   let macAssignments = [];
   if (macAddonEnabled) {
-    const promises = AMAZON_DOMAINS.map(async amazonDomain => {
-      const assigned = await getMACAssignment(`https://${amazonDomain}/`);
-      return assigned ? amazonDomain : null;
+    const promises = TIKTOK_DOMAINS.map(async tiktokDomain => {
+      const assigned = await getMACAssignment(`https://${tiktokDomain}/`);
+      return assigned ? tiktokDomain : null;
     });
     macAssignments = await Promise.all(promises);
   }
 
-  AMAZON_DOMAINS.map(async amazonDomain => {
-    const amazonCookieUrl = `https://${amazonDomain}/`;
+  TIKTOK_DOMAINS.map(async tiktokDomain => {
+    const tiktokCookieUrl = `https://${tiktokDomain}/`;
 
-    // dont clear cookies for amazonDomain if mac assigned (with or without www.)
+    // dont clear cookies for tiktokDomain if mac assigned (with or without www.)
     if (macAddonEnabled &&
-        (macAssignments.includes(amazonDomain) ||
-         macAssignments.includes(`www.${amazonDomain}`))) {
+        (macAssignments.includes(tiktokDomain) ||
+         macAssignments.includes(`www.${tiktokDomain}`))) {
       return;
     }
 
     containers.map(async container => {
       const storeId = container.cookieStoreId;
-      if (storeId === amazonCookieStoreId) {
-        // Don't clear cookies in the Amazon Container
+      if (storeId === tiktokCookieStoreId) {
+        // Don't clear cookies in the TikTok Container
         return;
       }
 
       const cookies = await browser.cookies.getAll({
-        domain: amazonDomain,
+        domain: tiktokDomain,
         storeId
       });
 
       cookies.map(cookie => {
         browser.cookies.remove({
           name: cookie.name,
-          url: amazonCookieUrl,
+          url: tiktokCookieUrl,
           storeId
         });
       });
       // Also clear Service Workers as it breaks detecting onBeforeRequest
-      await browser.browsingData.remove({hostnames: [amazonDomain]}, {serviceWorkers: true});
+      await browser.browsingData.remove({hostnames: [tiktokDomain]}, {serviceWorkers: true});
     });
   });
 }
 
 async function setupContainer () {
-  // Use existing Amazon container, or create one
+  // Use existing TikTok container, or create one
 
   const info = await browser.runtime.getBrowserInfo();
   if (parseInt(info.version) < 67) {
-    AMAZON_CONTAINER_DETAILS.color = "orange";
-    AMAZON_CONTAINER_DETIALS.color = "briefcase";
+    TIKTOK_CONTAINER_DETAILS.color = "purple";
+    TIKTOK_CONTAINER_DETIALS.color = "apple";
   }
 
-  const contexts = await browser.contextualIdentities.query({name: AMAZON_CONTAINER_DETAILS.name});
+  const contexts = await browser.contextualIdentities.query({name: TIKTOK_CONTAINER_DETAILS.name});
   if (contexts.length > 0) {
-    const amazonContext = contexts[0];
-    amazonCookieStoreId = amazonContext.cookieStoreId;
-    if (amazonContext.color !== AMAZON_CONTAINER_DETAILS.color ||
-        amazonContext.icon !== AMAZON_CONTAINER_DETAILS.icon) {
+    const tiktokContext = contexts[0];
+    tiktokCookieStoreId = tiktokContext.cookieStoreId;
+    if (tiktokContext.color !== TIKTOK_CONTAINER_DETAILS.color ||
+        tiktokContext.icon !== TIKTOK_CONTAINER_DETAILS.icon) {
           await browser.contextualIdentities.update(
-            amazonCookieStoreId,
-            { color: AMAZON_CONTAINER_DETAILS.color, icon: AMAZON_CONTAINER_DETAILS.icon }
+            tiktokCookieStoreId,
+            { color: TIKTOK_CONTAINER_DETAILS.color, icon: TIKTOK_CONTAINER_DETAILS.icon }
           );
     }
   } else {
-    const context = await browser.contextualIdentities.create(AMAZON_CONTAINER_DETAILS);
-    amazonCookieStoreId = context.cookieStoreId;
+    const context = await browser.contextualIdentities.create(TIKTOK_CONTAINER_DETAILS);
+    tiktokCookieStoreId = context.cookieStoreId;
   }
 
   const azcStorage = await browser.storage.local.get();
-  if (!azcStorage.domainsAddedToAmazonContainer) {
-    await browser.storage.local.set({ "domainsAddedToAmazonContainer": [] });
+  if (!azcStorage.domainsAddedToTikTokContainer) {
+    await browser.storage.local.set({ "domainsAddedToTikTokContainer": [] });
   }
 }
 
@@ -358,10 +273,10 @@ async function maybeReopenTab(url, tab, request) {
   return { cancel: true };
 }
 
-function isAmazonURL (url) {
+function isTikTokURL (url) {
   const parsedUrl = new URL(url);
-  for (let amazonHostRE of amazonHostREs) {
-    if (amazonHostRE.test(parsedUrl.host)) {
+  for (let tiktokHostRE of tiktokHostREs) {
+    if (tiktokHostRE.test(parsedUrl.host)) {
       return true;
     }
   }
@@ -373,25 +288,25 @@ async function supportsSiteSubdomainCheck(url) {
   return;
 }
 
-async function addDomainToAmazonContainer (url) {
+async function addDomainToTikTokContainer (url) {
   const parsedUrl = new URL(url);
   const azcStorage = await browser.storage.local.get();
-  azcStorage.domainsAddedToAmazonContainer.push(parsedUrl.host);
-  await browser.storage.local.set({"domainsAddedToAmazonContainer": azcStorage.domainsAddedToAmazonContainer});
+  azcStorage.domainsAddedToTikTokContainer.push(parsedUrl.host);
+  await browser.storage.local.set({"domainsAddedToTikTokContainer": azcStorage.domainsAddedToTikTokContainer});
   await supportSiteSubdomainCheck(parsedUrl.host);
 }
 
-async function removeDomainFromAmazonContainer (domain) {
+async function removeDomainFromTikTokContainer (domain) {
   const azcStorage = await browser.storage.local.get();
-  const domainIndex = azcStorage.domainsAddedToAmazonContainer.indexOf(domain);
-  azcStorage.domainsAddedToAmazonContainer.splice(domainIndex, 1);
-  await browser.storage.local.set({"domainsAddedToAmazonContainer": azcStorage.domainsAddedToAmazonContainer});
+  const domainIndex = azcStorage.domainsAddedToTikTokContainer.indexOf(domain);
+  azcStorage.domainsAddedToTikTokContainer.splice(domainIndex, 1);
+  await browser.storage.local.set({"domainsAddedToTikTokContainer": azcStorage.domainsAddedToTikTokContainer});
 }
 
-async function isAddedToAmazonContainer (url) {
+async function isAddedToTikTokContainer (url) {
   const parsedUrl = new URL(url);
   const azcStorage = await browser.storage.local.get();
-  if (azcStorage.domainsAddedToAmazonContainer.includes(parsedUrl.host)) {
+  if (azcStorage.domainsAddedToTikTokContainer.includes(parsedUrl.host)) {
     return true;
   }
   return false;
@@ -403,16 +318,16 @@ async function shouldContainInto (url, tab) {
     return false;
   }
 
-  const hasBeenAddedToAmazonContainer = await isAddedToAmazonContainer(url);
+  const hasBeenAddedToTikTokContainer = await isAddedToTikTokContainer(url);
 
-  if (isAmazonURL(url) || hasBeenAddedToAmazonContainer) {
-    if (tab.cookieStoreId !== amazonCookieStoreId) {
-      // Amazon-URL outside of Amazon Container Tab
-      // Should contain into Amazon Container
-      return amazonCookieStoreId;
+  if (isTikTokURL(url) || hasBeenAddedToTikTokContainer) {
+    if (tab.cookieStoreId !== tiktokCookieStoreId) {
+      // TikTok-URL outside of TikTok Container Tab
+      // Should contain into TikTok Container
+      return tiktokCookieStoreId;
     }
-  } else if (tab.cookieStoreId === amazonCookieStoreId) {
-    // Non-Amazon-URL inside Amazon Container Tab
+  } else if (tab.cookieStoreId === tiktokCookieStoreId) {
+    // Non-TikTok-URL inside TikTok Container Tab
     // Should contain into Default Container
     return "firefox-default";
   }
@@ -488,12 +403,12 @@ async function updateBrowserActionIcon (tab) {
   browser.browserAction.setBadgeText({text: ""});
 
   const url = tab.url;
-  const hasBeenAddedToAmazonContainer = await isAddedToAmazonContainer(url);
+  const hasBeenAddedToTikTokContainer = await isAddedToTikTokContainer(url);
 
-  if (isAmazonURL(url)) {
-    browser.storage.local.set({"CURRENT_PANEL": "on-amazon"});
+  if (isTikTokURL(url)) {
+    browser.storage.local.set({"CURRENT_PANEL": "on-tiktok"});
     browser.browserAction.setPopup({tabId: tab.id, popup: "./panel.html"});
-  } else if (hasBeenAddedToAmazonContainer) {
+  } else if (hasBeenAddedToTikTokContainer) {
     browser.storage.local.set({"CURRENT_PANEL": "in-azc"});
   } else {
     const tabState = tabStates[tab.id];
@@ -507,7 +422,7 @@ async function updateBrowserActionIcon (tab) {
   }
 }
 
-async function containAmazon (request) {
+async function containTikTok (request) {
   if (tabsWaitingToLoad[request.tabId]) {
     // Cleanup just to make sure we don't get a race-condition with startup reopening
     delete tabsWaitingToLoad[request.tabId];
@@ -522,7 +437,7 @@ async function containAmazon (request) {
   if (urlSearchParm.has("azclid")) {
     return {redirectUrl: stripAzclid(request.url)};
   }
-  // Listen to requests and open Amazon into its Container,
+  // Listen to requests and open TikTok into its Container,
   // open other sites into the default tab context
   if (request.tabId === -1) {
     // Request doesn't belong to a tab
@@ -534,7 +449,7 @@ async function containAmazon (request) {
 
 // Lots of this is borrowed from old blok code:
 // https://github.com/mozilla/blok/blob/master/src/js/background.js
-async function blockAmazonSubResources (requestDetails) {
+async function blockTikTokSubResources (requestDetails) {
   if (requestDetails.type === "main_frame") {
     return {};
   }
@@ -543,32 +458,32 @@ async function blockAmazonSubResources (requestDetails) {
     return {};
   }
 
-  const urlIsAmazon = isAmazonURL(requestDetails.url);
-  const originUrlIsAmazon = isAmazonURL(requestDetails.originUrl);
+  const urlIsTikTok = isTikTokURL(requestDetails.url);
+  const originUrlIsTikTok = isTikTokURL(requestDetails.originUrl);
 
-  if (!urlIsAmazon) {
+  if (!urlIsTikTok) {
     return {};
   }
 
-  if (originUrlIsAmazon) {
-    const message = {msg: "amazon-domain"};
+  if (originUrlIsTikTok) {
+    const message = {msg: "tiktok-domain"};
     // Send the message to the content_script
     browser.tabs.sendMessage(requestDetails.tabId, message);
     return {};
   }
 
-  const hasBeenAddedToAmazonContainer = await isAddedToAmazonContainer(requestDetails.originUrl);
+  const hasBeenAddedToTikTokContainer = await isAddedToTikTokContainer(requestDetails.originUrl);
 
-  if (urlIsAmazon && !originUrlIsAmazon) {
-    if (!hasBeenAddedToAmazonContainer ) {
-      const message = {msg: "blocked-amazon-subresources"};
+  if (urlIsTikTok && !originUrlIsTikTok) {
+    if (!hasBeenAddedToTikTokContainer ) {
+      const message = {msg: "blocked-tiktok-subresources"};
       // Send the message to the content_script
       browser.tabs.sendMessage(requestDetails.tabId, message);
 
       tabStates[requestDetails.tabId] = { trackersDetected: true };
       return {cancel: true};
     } else {
-      const message = {msg: "allowed-amazon-subresources"};
+      const message = {msg: "allowed-tiktok-subresources"};
       // Send the message to the content_script
       browser.tabs.sendMessage(requestDetails.tabId, message);
       return {};
@@ -590,10 +505,10 @@ function setupWebRequestListeners() {
   },{urls: ["<all_urls>"], types: ["main_frame"]});
 
   // Add the main_frame request listener
-  browser.webRequest.onBeforeRequest.addListener(containAmazon, {urls: ["<all_urls>"], types: ["main_frame"]}, ["blocking"]);
+  browser.webRequest.onBeforeRequest.addListener(containTikTok, {urls: ["<all_urls>"], types: ["main_frame"]}, ["blocking"]);
 
   // Add the sub-resource request listener
-  browser.webRequest.onBeforeRequest.addListener(blockAmazonSubResources, {urls: ["<all_urls>"]}, ["blocking"]);
+  browser.webRequest.onBeforeRequest.addListener(blockTikTokSubResources, {urls: ["<all_urls>"]}, ["blocking"]);
 }
 
 function setupWindowsAndTabsListeners() {
@@ -611,23 +526,23 @@ function setupWindowsAndTabsListeners() {
   } catch (error) {
     // TODO: Needs backup strategy
     // See ...
-    // Sometimes this add-on is installed but doesn't get a amazonCookieStoreId ?
+    // Sometimes this add-on is installed but doesn't get a tiktokCookieStoreId ?
     // eslint-disable-next-line no-console
     console.log(error);
     return;
   }
-  clearAmazonCookies();
-  generateAmazonHostREs();
+  clearTikTokCookies();
+  generateTikTokHostREs();
   setupWebRequestListeners();
   setupWindowsAndTabsListeners();
 
   browser.runtime.onMessage.addListener( (message, {url}) => {
     if (message === "what-sites-are-added") {
-      return browser.storage.local.get().then(azcStorage => azcStorage.domainsAddedToAmazonContainer);
+      return browser.storage.local.get().then(azcStorage => azcStorage.domainsAddedToTikTokContainer);
     } else if (message.removeDomain) {
-      removeDomainFromAmazonContainer(message.removeDomain).then( results => results );
+      removeDomainFromTikTokContainer(message.removeDomain).then( results => results );
     } else {
-      addDomainToAmazonContainer(url).then( results => results);
+      addDomainToTikTokContainer(url).then( results => results);
     }
   });
 
