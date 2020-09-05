@@ -8,7 +8,7 @@ TikTok Container is an add-on you can install on Firefox to prevent TikTok from 
 
 ## Forked from Mozilla's Facebook Container  
 
-This is a lazy port of [Amazon Container](https://github.com/krober/contain-amazon), which is a fork of Mozilla's [Facebook Container](https://addons.mozilla.org/en-US/firefox/addon/facebook-container/).
+This is a lazy fork of [Amazon Container](https://github.com/krober/contain-amazon), which is a fork of Mozilla's [Facebook Container](https://addons.mozilla.org/en-US/firefox/addon/facebook-container/).
 
 ## How does TikTok Container work?
 
