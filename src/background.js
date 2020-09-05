@@ -2,10 +2,11 @@
 const TIKTOK_CONTAINER_DETAILS = {
   name: "TikTok",
   color: "purple",
-  icon: "apple"
+  icon: "chill"
 };
 
 const ALL_TIKTOK_DOMAINS = [
+  "tiktok.com",
   "tiktok.com",
   "tiktok.org",
   "tiktokcdn.com",
@@ -27,6 +28,10 @@ const ALL_TIKTOK_DOMAINS = [
   "ibytedtos.com",
   "app.musemuse.cn",
   "share.musemuse.cn"
+];
+
+let TIKTOK_DOMAINS = [
+"example.com"
 ];
 
 TIKTOK_DOMAINS = TIKTOK_DOMAINS.concat(
@@ -220,7 +225,7 @@ async function setupContainer () {
   const info = await browser.runtime.getBrowserInfo();
   if (parseInt(info.version) < 67) {
     TIKTOK_CONTAINER_DETAILS.color = "purple";
-    TIKTOK_CONTAINER_DETIALS.color = "apple";
+    TIKTOK_CONTAINER_DETIALS.color = "chill";
   }
 
   const contexts = await browser.contextualIdentities.query({name: TIKTOK_CONTAINER_DETAILS.name});
