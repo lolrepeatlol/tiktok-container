@@ -43,4 +43,4 @@ Other ad networks may try to link your TikTok activities with your regular brows
 
 Good news! Containers aren’t just for TikTok. You can use Containers to prevent websites from linking your identities across the Web by installing [Firefox Multi-Account Containers](https://addons.mozilla.org/firefox/addon/multi-account-containers/).
 
-To learn more about how Mult-Account Containers work, see Mozilla's support page at [Firefox Multi-Account Containers](https://addons.mozilla.org/firefox/addon/multi-account-containers/).
+To learn more about how Multi-Account Containers work, see Mozilla's support page at [Firefox Multi-Account Containers](https://addons.mozilla.org/firefox/addon/multi-account-containers/).
